@@ -2,19 +2,16 @@ import subprocess
 from pathlib import Path
 from django.conf import settings
 from django.core.files import File
-
-
-RESOLUTIONS = {
-    "360p": "640:360",
-    "480p": "854:480",
-    "720p": "1280:720",
-}
+from ..config import VIDEO_RENDITIONS
 
 
 def transcode(video):
     input_path = video.video_file.path
 
-    for label, resolution in RESOLUTIONS.items():
+    for _, r in enumerate(VIDEO_RENDITIONS):
+
+        label = r.label
+        resolution = r.resolution
 
         output_dir = Path(settings.MEDIA_ROOT) / "processed" / f"{label}"
         output_dir.mkdir(parents=True, exist_ok=True)

@@ -1,14 +1,9 @@
 import subprocess
 from pathlib import Path
 from django.conf import settings
-from django.core.files import File
 from .keys import generate_key
 
-HLS_RENDITIONS = [
-    ("360p", "640x360", "800k"),
-    ("480p", "854x480", "1400k"),
-    ("720p", "1280x720", "2800k"),
-]
+from ..config import HLS_RENDITIONS
 
 
 def generate_hls(video):
@@ -31,8 +26,8 @@ def generate_hls(video):
     if keyinfo.stat().st_size == 0:
         raise RuntimeError("keyinfo.txt is empty")
 
-    for label, resolution, bitrate in HLS_RENDITIONS:
-        playlist = hls_dir / f"{label}.m3u8"
+    for i, r in enumerate(HLS_RENDITIONS):
+        playlist = hls_dir / f"{r.label}.m3u8"
 
         cmd = [
             "ffmpeg",
@@ -40,7 +35,7 @@ def generate_hls(video):
             "-i",
             input_path,
             "-vf",
-            f"scale={resolution}",
+            f"scale={r.resolution}",
             "-c:a",
             "aac",
             "-ar",
@@ -64,36 +59,25 @@ def generate_hls(video):
             "-hls_playlist_type",
             "vod",
             "-b:v",
-            bitrate,
+            r.bitrate,
             "-maxrate",
-            bitrate,
+            r.bitrate,
             "-bufsize",
             "2M",
             "-hls_key_info_file",
             str(keyinfo),
             "-hls_segment_filename",
-            str(hls_dir / f"{label}_%03d.ts"),
+            str(hls_dir / f"{r.label}_%03d.ts"),
             str(playlist),
         ]
 
         subprocess.run(cmd, check=True)
 
         variant_entries.append(
-            f"#EXT-X-STREAM-INF:BANDWIDTH={bitrate.replace('k','000')},RESOLUTION={resolution}\n{label}.m3u8"
+            f"#EXT-X-STREAM-INF:BANDWIDTH={r.bitrate.replace('k','000')},RESOLUTION={r.resolution}\n{r.label}.m3u8"
         )
 
     master_playlist.write_text("#EXTM3U\n" + "\n".join(variant_entries))
 
-    # with open(master_playlist, "rb") as f:
-    #     video.hls_master.save(f"{video.id}/master.m3u8", File(f), save=True)
-
     video.hls_master = f"hls/{video.id}/master.m3u8"
     video.save(update_fields=["hls_master"])
-
-    # with open(master_playlist, "rb") as f:
-    #     print(f.name)
-    #     getattr(video, "hls_master").save(
-    #         f"{video.id}/master.m3u8", File(f), save=False
-    #     )
-    # video.status = 'ready'
-    # video.save()

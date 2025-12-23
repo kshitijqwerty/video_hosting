@@ -3,12 +3,8 @@ from pathlib import Path
 
 from django.conf import settings
 from django.core.files import File
+from ..config import DASH_RENDITIONS
 
-DASH_RENDITIONS = [
-    {"label": "360p", "resolution": "640x360", "bitrate": "800k"},
-    {"label": "480p", "resolution": "854x480", "bitrate": "1400k"},
-    {"label": "720p", "resolution": "1280x720", "bitrate": "2800k"},
-]
 
 def generate_dash(video):
     input_path = video.video_file.path
@@ -29,8 +25,8 @@ def generate_dash(video):
     for i, r in enumerate(DASH_RENDITIONS):
         cmd += [
             "-map", "0:v",
-            f"-s:v:{i}", r["resolution"],
-            f"-b:v:{i}", r["bitrate"],
+            f"-s:v:{i}", r.resolution,
+            f"-b:v:{i}", r.bitrate,
         ]
 
     # Map audio once
@@ -61,17 +57,6 @@ def generate_dash(video):
     for f in dash_dir.glob("manifest_*.mpd"):
         if f.name != "manifest.mpd":
             f.unlink()
-
-    # with open(mpd_path, "rb") as f:
-    #     video.dash_master.save(
-    #         f"{video.id}/manifest.mpd",
-    #         File(f),
-    #         save=True
-    #     )
-    # with open(mpd_path, "rb") as f:
-    #     getattr(video, "dash_master").save(
-    #         f"{video.id}/manifest.mpd", File(f), save=False
-    #     )
 
     video.dash_master = f"dash/{video.id}/manifest.mpd"
     video.save(update_fields=["dash_master"])
