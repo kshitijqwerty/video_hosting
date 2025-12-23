@@ -1,4 +1,4 @@
-# Video Streaming Platform (Django + FFmpeg)
+# Video Streaming Platform (Django + FFmpeg) (WIP)
 
 A video streaming platform built with **Django** and **FFmpeg** that supports
 **HLS** and **MPEG-DASH** adaptive streaming.  
@@ -121,5 +121,5 @@ docker-compose up
 ```
 ### Application runs at:
 ```
-http://localhost:8000
+http://localhost:8000/upload
 ```
