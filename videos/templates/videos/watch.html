@@ -1,0 +1,34 @@
+<h2>{{ video.title }}</h2>
+
+{% if video.dash_master %}
+<h3>DASH Player</h3>
+<script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
+
+<video id="dashVideo" controls width="720"></video>
+
+<script>
+  const dashVideo = document.getElementById("dashVideo");
+  const dashSrc = "/media/{{ video.dash_master }}";
+
+  const player = dashjs.MediaPlayer().create();
+  player.initialize(dashVideo, dashSrc, true);
+</script>
+
+
+{% else %}
+<script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
+<video id="video" controls width="720"></video>
+
+<script>
+  const video = document.getElementById('video');
+  const src = "/media/{{ video.hls_master }}";
+
+  if (Hls.isSupported()) {
+    const hls = new Hls();
+    hls.loadSource(src);
+    hls.attachMedia(video);
+  } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
+    video.src = src;
+  }
+</script>
+{% endif %}
