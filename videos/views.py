@@ -5,9 +5,7 @@ from django.conf import settings
 from pathlib import Path
 
 from .models import Video
-from .services.transcoder import transcode
-from .services.hls import generate_hls
-from .services.dash import generate_dash
+from .tasks import process_video_async
 
 
 def upload_video(request):
@@ -16,16 +14,10 @@ def upload_video(request):
         file = request.FILES.get("video")
 
         video = Video.objects.create(title=title, video_file=file)
-        try:
-            # transcode(video)
-            generate_hls(video)
-            generate_dash(video)
-        except Exception as e:
-            video.status = "failed"
-            video.save()
-            raise e
 
-        return redirect("watch_video", video_id=video.id)
+        process_video_async(video.id)
+        
+        return redirect("video_list")
 
     return render(request, "videos/upload.html")
 
@@ -33,6 +25,10 @@ def upload_video(request):
 def watch_video(request, video_id):
     video = get_object_or_404(Video, id=video_id)
     return render(request, "videos/watch.html", {"video": video})
+
+def video_list(request):
+    videos = Video.objects.order_by("-id")
+    return render(request, "videos/video_list.html", {"videos": videos})
 
 
 def serve_key(request, video_id):

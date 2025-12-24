@@ -1,0 +1,31 @@
+<h2>Videos</h2>
+
+<a href="{% url 'upload_video' %}">Upload New Video</a>
+
+<hr>
+
+<ul>
+  {% for video in videos %}
+    <li>
+      <strong>{{ video.title }}</strong><br>
+
+      Status: {{ video.status }}<br>
+      Progress: {{ video.progress }}%
+
+      {% if video.status == "ready" %}
+        <br>
+        <a href="{% url 'watch_video' video.id %}">Watch</a>
+      {% elif video.status == "failed" %}
+        <br>
+        ❌ Processing failed
+      {% endif %}
+    </li>
+    <hr>
+  {% empty %}
+    <li>No videos yet</li>
+  {% endfor %}
+</ul>
+
+{% if videos|length %}
+<meta http-equiv="refresh" content="5">
+{% endif %}

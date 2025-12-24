@@ -4,7 +4,7 @@ import uuid
 
 class Video(models.Model):
     STATUS_CHOICES = [
-        ("uploaded", "Uploaded"),
+        ("pending", "Pending"),
         ("processing", "Processing"),
         ("ready", "Ready"),
         ("failed", "Failed"),
@@ -16,7 +16,9 @@ class Video(models.Model):
     hls_master = models.CharField(max_length=500)
     dash_master = models.CharField(max_length=500)
 
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="uploaded")
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default="pending")
+    progress = models.PositiveIntegerField(default=0)
+
 
     upload_at = models.DateTimeField(auto_now_add=True)
 
