@@ -5,16 +5,19 @@ from .services.dash import generate_dash
 
 def process_video(video_id):
     video = Video.objects.get(id=video_id)
+    videoAsset = video.asset
+    if videoAsset.status == 'ready':
+        return
     try:
-        video.status = 'processing'
-        video.save()
-        generate_hls(video)
-        generate_dash(video)
-        video.status = 'ready'
-        video.save()
+        videoAsset.status = 'processing'
+        videoAsset.save()
+        generate_hls(videoAsset)
+        generate_dash(videoAsset)
+        videoAsset.status = 'ready'
+        videoAsset.save()
     except Exception as e:
-        video.status = "failed"
-        video.save()
+        videoAsset.status = "failed"
+        videoAsset.save()
         raise e
 
 def process_video_async(video_id):

@@ -8,8 +8,9 @@ from ..config import DASH_RENDITIONS
 
 def generate_dash(video):
     input_path = video.video_file.path
+    video_asset_id = str(video.content_hash)
 
-    dash_dir = Path(settings.MEDIA_ROOT) / "dash" / str(video.id)
+    dash_dir = Path(settings.MEDIA_ROOT) / "dash" / video_asset_id
     dash_dir.mkdir(parents=True, exist_ok=True)
 
     mpd_path = dash_dir / "manifest.mpd"
@@ -52,11 +53,10 @@ def generate_dash(video):
         str(mpd_path),
     ]
 
-    print("FFmpeg DASH:", " ".join(cmd))
     subprocess.run(cmd, check=True, cwd=dash_dir)
     for f in dash_dir.glob("manifest_*.mpd"):
         if f.name != "manifest.mpd":
             f.unlink()
 
-    video.dash_master = f"dash/{video.id}/manifest.mpd"
+    video.dash_master = f"dash/{video_asset_id}/manifest.mpd"
     video.save(update_fields=["dash_master"])

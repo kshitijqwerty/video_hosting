@@ -9,13 +9,13 @@
     <li>
       <strong>{{ video.title }}</strong><br>
 
-      Status: {{ video.status }}<br>
-      Progress: {{ video.progress }}%
+      Status: {{ video.asset.status }}<br>
+      Progress: {{ video.asset.progress }}%
 
-      {% if video.status == "ready" %}
+      {% if video.asset.status == "ready" %}
         <br>
         <a href="{% url 'watch_video' video.id %}">Watch</a>
-      {% elif video.status == "failed" %}
+      {% elif video.asset.status == "failed" %}
         <br>
         ❌ Processing failed
       {% endif %}

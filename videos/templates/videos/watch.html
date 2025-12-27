@@ -1,6 +1,6 @@
 <h2>{{ video.title }}</h2>
 
-{% if video.dash_master %}
+{% if video.asset.dash_master %}
 <h3>DASH Player</h3>
 <script src="https://cdn.dashjs.org/latest/dash.all.min.js"></script>
 
@@ -8,7 +8,7 @@
 
 <script>
   const dashVideo = document.getElementById("dashVideo");
-  const dashSrc = "/media/{{ video.dash_master }}";
+  const dashSrc = "/media/{{ video.asset.dash_master }}";
 
   const player = dashjs.MediaPlayer().create();
   player.initialize(dashVideo, dashSrc, true);
@@ -16,12 +16,13 @@
 
 
 {% else %}
+<h3>HLS Player</h3>
 <script src="https://cdn.jsdelivr.net/npm/hls.js@latest"></script>
 <video id="video" controls width="720"></video>
 
 <script>
   const video = document.getElementById('video');
-  const src = "/media/{{ video.hls_master }}";
+  const src = "/media/{{ video.asset.hls_master }}";
 
   if (Hls.isSupported()) {
     const hls = new Hls();

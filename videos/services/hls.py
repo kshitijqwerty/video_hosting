@@ -9,7 +9,9 @@ from ..config import HLS_RENDITIONS
 def generate_hls(video):
     input_path = video.video_file.path
 
-    hls_dir = Path(settings.MEDIA_ROOT) / "hls" / str(video.id)
+    video_asset_id = str(video.content_hash)
+
+    hls_dir = Path(settings.MEDIA_ROOT) / "hls" / video_asset_id
     hls_dir.mkdir(parents=True, exist_ok=True)
 
     master_playlist = hls_dir / "master.m3u8"
@@ -17,10 +19,10 @@ def generate_hls(video):
     variant_entries = []
     # Key management
 
-    key_path = generate_key(video.id)
+    key_path = generate_key(video_asset_id)
 
     keyinfo = hls_dir / "keyinfo.txt"
-    keyinfo.write_text(f"http://127.0.0.1:8000/keys/{video.id}/\n" f"{key_path}\n")
+    keyinfo.write_text(f"http://127.0.0.1:8000/keys/{video_asset_id}/\n" f"{key_path}\n")
 
     # 🔍 HARD ASSERT (IMPORTANT)
     if keyinfo.stat().st_size == 0:
@@ -79,5 +81,5 @@ def generate_hls(video):
 
     master_playlist.write_text("#EXTM3U\n" + "\n".join(variant_entries))
 
-    video.hls_master = f"hls/{video.id}/master.m3u8"
+    video.hls_master = f"hls/{video_asset_id}/master.m3u8"
     video.save(update_fields=["hls_master"])
